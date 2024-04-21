@@ -30,6 +30,8 @@ void ATurretLaserActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TraceStart = TraceStartPosition->GetComponentLocation();
+
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereBeginOverlap);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereEndOverlap);
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, SphereCollision->OnComponentBeginOverlap.IsBound()? "true" : "false");
@@ -39,6 +41,10 @@ void ATurretLaserActor::BeginPlay()
 void ATurretLaserActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (OverlappingActor)
+	{
+		LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+	}
 
 }
 
