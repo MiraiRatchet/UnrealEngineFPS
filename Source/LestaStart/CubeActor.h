@@ -38,7 +38,7 @@ public:
 
 private:
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, EditDefaultsOnly)
 	UHealthComponent* CubeHealth;
 
 	UPROPERTY(EditDefaultsOnly)

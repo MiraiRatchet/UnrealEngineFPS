@@ -19,8 +19,9 @@ ACubeActor::ACubeActor()
 void ACubeActor::BeginPlay()
 {
 	Super::BeginPlay();
-
+	if (CubeHealth)
 	CubeHealth->OnHealthChangeEvent.BindDynamic(this, &ACubeActor::HealthBarChange);
+	if (WidgetComponent)
 	HealthHUD = Cast<UHealthHUD>(WidgetComponent->GetUserWidgetObject());
 	HealthBarChange();
 }
@@ -43,9 +44,8 @@ void ACubeActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 void ACubeActor::HealthBarChange()
 {
-	if (HealthHUD)
+	if (HealthHUD && CubeHealth)
 	{
-		UE_LOG(LogTemp, Display, TEXT("ITSOK"));
 		HealthHUD->HealthUIChange(CubeHealth->GetCurrentHealth(), CubeHealth->GetMaximumHealth(), CubeHealth->GetPercentHealth());
 	}
 }
