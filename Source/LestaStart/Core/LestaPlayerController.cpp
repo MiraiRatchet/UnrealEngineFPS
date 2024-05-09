@@ -14,3 +14,11 @@ void ALestaPlayerController::BeginPlay()
 		}
 	}
 }
+
+//void ALestaPlayerController::DealDamageToActor(UHealthComponent* HealthComp, float Damage)
+//{
+//	if (HealthComp)
+//	{
+//		HealthComp->FTakeDamage(Damage);
+//	}
+//}

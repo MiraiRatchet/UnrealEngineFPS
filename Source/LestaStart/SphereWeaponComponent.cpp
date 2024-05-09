@@ -1,8 +1,8 @@
 
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SphereWeaponComponent.h"
+#include"./Core/LestaPlayerController.h"
 
 // Sets default values for this component's properties
 USphereWeaponComponent::USphereWeaponComponent()
@@ -46,6 +46,11 @@ void USphereWeaponComponent::ChargedShot(FVector DrawingLocation)
 			auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
 			if (HitHealth)
 			{
+				//auto PlayerController = Cast<ALestaPlayerController>(GetWorld()->GetFirstPlayerController());
+				//if (PlayerController)
+				//{
+				//	PlayerController->DealDamageToActor(HitHealth, CurrentChargedDamage);
+				//}
 				HitHealth->FTakeDamage(CurrentChargedDamage);
 			}
 		}
@@ -57,13 +62,5 @@ void USphereWeaponComponent::ChargingDrawRadius(FVector DrawingLocation, double 
 {
 	DrawDebugSphere(GetWorld(), DrawingLocation, DamageRadius, 16, FColor::Blue);
 	CurrentChargedDamage = FMath::Clamp(UnchargedDamage + DamagePerSecond * ElapsedTime, UnchargedDamage, MaxChargedDamage);
-	//if (CurrentChargedDamage < MaxChargedDamage)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, FString::Printf(TEXT("%d"), CurrentChargedDamage));
-	//}
-	//else
-	//{
-	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("FULL DMG %d"), CurrentChargedDamage));
-	//}
 }
 

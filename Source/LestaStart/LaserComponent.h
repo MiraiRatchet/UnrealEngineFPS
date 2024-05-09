@@ -19,14 +19,11 @@ public:
 	// Sets default values for this component's properties
 	ULaserComponent();
 
-	UPROPERTY(EditDefaultsOnly)
-	int DamagePerSecond = 15;
-
-	UPROPERTY(EditDefaultsOnly)
-	float MaxHitDistance = 300;
+	UFUNCTION()
+	void ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel) const;
 
 	UFUNCTION()
-	void ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel);
+	float GetMaxHitDistance() const;
 
 protected:
 	// Called when the game starts
@@ -36,5 +33,15 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+private:
+	FCollisionQueryParams CollisionParams;
+
+	UPROPERTY(VisibleAnywhere)
+	bool IsCharging = false;
+
+	UPROPERTY(EditAnywhere)
+	int DamagePerSecond = 15;
+
+	UPROPERTY(EditAnywhere)
+	float MaxHitDistance = 300;
 };

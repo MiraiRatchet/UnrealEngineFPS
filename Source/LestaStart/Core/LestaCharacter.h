@@ -8,6 +8,7 @@
 #include "../HealthComponent.h"
 #include "../LaserComponent.h"
 #include "../SphereWeaponComponent.h"
+//#include "Components/Widget.h"
 #include "LestaCharacter.generated.h"
 
 class UCameraComponent;
@@ -35,7 +36,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* PistolMuzzle = nullptr;
 
-protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UHealthComponent* PlayerHealth;
+
+private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> CameraComponent;
 
@@ -50,11 +54,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> ShootInputAction;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UPROPERTY(EditDefaultsOnly, Category = "Input") 
 	TObjectPtr<UInputAction> ChangeWeaponInputAction;
-
-	UPROPERTY(EditDefaultsOnly)
-	UHealthComponent* PlayerHealth;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	ULaserComponent* LaserWeapon;
@@ -65,12 +66,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UWeaponState WeaponState;
 
+	UPROPERTY()
+	bool IsCharging = false;
+protected:
+
 	virtual void OnMoveInput(const FInputActionInstance& InputActionInstance);
 	virtual void OnLookInput(const FInputActionInstance& InputActionInstance);
-	virtual void OnShootInput(const FInputActionInstance& InputActionInstance);
+	virtual void OnShootTriggeredInput(const FInputActionInstance& InputActionInstance);
+	virtual void OnShootOngoingInput(const FInputActionInstance& InputActionInstance);
+	virtual void OnWeaponChangeInput(const FInputActionInstance& InputActionInstance);
 
 	UFUNCTION()
-	virtual void OnShootChargeInput(const FInputActionInstance& InputActionInstance);
+	void PlayerDead();
 
-	virtual void OnWeaponChangeInput(const FInputActionInstance& InputActionInstance);
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
 };

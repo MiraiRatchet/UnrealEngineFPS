@@ -4,8 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/GameEngine.h"
+#include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 #include "HealthComponent.generated.h"
 
+
+UDELEGATE()
+DECLARE_DYNAMIC_DELEGATE(FOnHealthChangeDelegate);
+
+UDELEGATE()
+DECLARE_DYNAMIC_DELEGATE(FOnDeadDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LESTASTART_API UHealthComponent : public UActorComponent
@@ -16,11 +25,8 @@ public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Health")
-	int MaximumHealth;
-
-	UPROPERTY(VisibleAnywhere, Category = "Health")
-	float CurrentHealth;
+	FOnHealthChangeDelegate OnHealthChangeEvent;
+	FOnDeadDelegate OnDeadEvent;
 
 	UFUNCTION()
 	void FTakeDamage(float HealthPoints);
@@ -29,8 +35,18 @@ public:
 	void FHeal(float HealthPoints);
 
 	UFUNCTION()
-	void FKill();
+	void FKill() const;
 
+	UFUNCTION()
+	int GetMaximumHealth() const;
+
+	UFUNCTION()
+	float GetCurrentHealth() const;
+
+	UFUNCTION()
+	float GetPercentHealth() const;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	// Called when the game starts
@@ -39,6 +55,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+private:
+	UPROPERTY(Replicated, EditAnywhere, Category = "Health")
+	int MaximumHealth;
 
-		
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Health")
+	float CurrentHealth;
 };

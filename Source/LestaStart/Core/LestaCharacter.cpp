@@ -2,6 +2,7 @@
 
 #include "LestaCharacter.h"
 #include "EnhancedInputComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 
 ALestaCharacter::ALestaCharacter()
@@ -19,6 +20,12 @@ ALestaCharacter::ALestaCharacter()
 	WeaponState = UWeaponState::SPHERE;
 }
 
+void ALestaCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	PlayerHealth->OnDeadEvent.BindDynamic(this, &ALestaCharacter::PlayerDead);
+}
+
 void ALestaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -28,8 +35,8 @@ void ALestaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		EIC->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ThisClass::OnMoveInput);
 		EIC->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ThisClass::OnLookInput);
-		EIC->BindAction(ShootInputAction, ETriggerEvent::Triggered, this, &ThisClass::OnShootInput);
-		EIC->BindAction(ShootInputAction, ETriggerEvent::Ongoing, this, &ThisClass::OnShootChargeInput);
+		EIC->BindAction(ShootInputAction, ETriggerEvent::Triggered, this, &ThisClass::OnShootTriggeredInput);
+		EIC->BindAction(ShootInputAction, ETriggerEvent::Ongoing, this, &ThisClass::OnShootOngoingInput);
 		EIC->BindAction(ChangeWeaponInputAction, ETriggerEvent::Triggered, this, &ThisClass::OnWeaponChangeInput);
 	}
 	else
@@ -38,6 +45,7 @@ void ALestaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		// You can read more here: https://dev.epicgames.com/documentation/en-us/unreal-engine/logging-in-unreal-engine
 		UE_LOG(LogInput, Error, TEXT("Unexpected input component class: %s"), *GetFullNameSafe(PlayerInputComponent))
 	}
+
 }
 
 void ALestaCharacter::OnMoveInput(const FInputActionInstance& InputActionInstance)
@@ -61,21 +69,24 @@ void ALestaCharacter::OnLookInput(const FInputActionInstance& InputActionInstanc
 	AddControllerPitchInput(Input2D.Y);
 }
 
-void ALestaCharacter::OnShootInput(const FInputActionInstance& InputActionInstance)
+void ALestaCharacter::OnShootTriggeredInput(const FInputActionInstance& InputActionInstance)
 {
-	if (WeaponState == UWeaponState::SPHERE)
-	{
+	switch (WeaponState) {
+	case (UWeaponState::SPHERE):
 		SphereWeapon->ChargedShot(GetActorLocation());
+		break;
 	}
+	IsCharging = false;
 }
 
-void ALestaCharacter::OnShootChargeInput(const FInputActionInstance& InputActionInstance)
+void ALestaCharacter::OnShootOngoingInput(const FInputActionInstance& InputActionInstance)
 {
+	IsCharging = true;
 	switch (WeaponState) {
 	case (UWeaponState::LASER):
 		if (PistolMuzzle)
 		{
-			LaserWeapon->ChargedShot(PistolMuzzle->GetComponentLocation(), CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * LaserWeapon->MaxHitDistance, ECC_Visibility);
+			LaserWeapon->ChargedShot(PistolMuzzle->GetComponentLocation(), CameraComponent->GetComponentLocation(), CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * LaserWeapon->GetMaxHitDistance(), ECC_Visibility);
 		}
 		break;
 	case (UWeaponState::SPHERE):
@@ -86,6 +97,11 @@ void ALestaCharacter::OnShootChargeInput(const FInputActionInstance& InputAction
 
 void ALestaCharacter::OnWeaponChangeInput(const FInputActionInstance& InputActionInstance)
 {
+	if (IsCharging)
+	{
+		return;
+	}
+
 	auto KeyPressed = FMath::FloorToInt(InputActionInstance.GetValue().Get<float>());
 	if (KeyPressed == 2)
 	{
@@ -109,4 +125,10 @@ void ALestaCharacter::OnWeaponChangeInput(const FInputActionInstance& InputActio
 		GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Black, "LASER");
 		break;
 	}
+}
+
+
+void ALestaCharacter::PlayerDead()
+{
+	UGameplayStatics::OpenLevel(this, FName(UGameplayStatics::GetCurrentLevelName(this)));
 }

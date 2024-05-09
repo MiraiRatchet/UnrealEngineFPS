@@ -2,15 +2,21 @@
 
 
 #include "TurretLaserActor.h"
+#include "Math/UnrealMathUtility.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ATurretLaserActor::ATurretLaserActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	TurretMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CubeMesh"));
 	SetRootComponent(TurretMesh);
+
+	CylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CylinderMesh"));
+	CylinderMesh->SetupAttachment(GetRootComponent());
 
 	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereTrigger"));
 	SphereCollision->SetSphereRadius(200);
@@ -23,6 +29,7 @@ ATurretLaserActor::ATurretLaserActor()
 	TurretHealth = CreateDefaultSubobject<UHealthComponent>(TEXT("TurretHealth"));
 	LaserWeapon = CreateDefaultSubobject<ULaserComponent>(TEXT("LaserWeapon"));
 
+	CylinderMesh->SetRelativeLocation(FVector(0, 0, 75));
 }
 
 // Called when the game starts or when spawned
@@ -34,24 +41,44 @@ void ATurretLaserActor::BeginPlay()
 
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereBeginOverlap);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereEndOverlap);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, SphereCollision->OnComponentBeginOverlap.IsBound()? "true" : "false");
-}
 
+	TurretHealth->OnHealthChangeEvent.BindDynamic(this, &ATurretLaserActor::HealthBarChange);
+	HealthHUD = Cast<UHealthHUD>(HealthWidget->GetUserWidgetObject());
+	HealthBarChange();
+
+	CylinderWorldLocation = CylinderMesh->GetComponentLocation();
+	PastRotationZ = CylinderMesh->GetComponentRotation().Yaw;
+}
 // Called every frame
 void ATurretLaserActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (OverlappingActor)
 	{
-		LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+		RotateToPlayer(DeltaTime);
+		if (LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
+		{
+			LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+		}
 	}
+
+}
+
+void ATurretLaserActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATurretLaserActor, TurretHealth);
+	DOREPLIFETIME(ATurretLaserActor, CylinderMesh);
+	DOREPLIFETIME(ATurretLaserActor, HealthWidget);
+	DOREPLIFETIME(ATurretLaserActor, HealthHUD);
+	DOREPLIFETIME(ATurretLaserActor, OverlappingActor);
 
 }
 
 void ATurretLaserActor::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, "OVERLAPPPPPPPPPP");
 	if (!OverlappingActor)
 	{
 		OverlappingActor = OtherActor;
@@ -61,10 +88,28 @@ void ATurretLaserActor::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 void ATurretLaserActor::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, "OVERLAPPPPPPPPPP EEEEEEEND");
 	if (OtherActor == OverlappingActor)
 	{
 		OverlappingActor = nullptr;
 	}
 }
 
+
+void ATurretLaserActor::HealthBarChange()
+{
+	if (HealthHUD)
+	{
+		HealthHUD->HealthUIChange(TurretHealth->GetCurrentHealth(), TurretHealth->GetMaximumHealth(), TurretHealth->GetPercentHealth());
+	}
+}
+
+void ATurretLaserActor::RotateToPlayer(float DeltaTime)
+{
+	NeededRotatorYaw = UKismetMathLibrary::FindLookAtRotation(CylinderWorldLocation, OverlappingActor->GetActorLocation()).Yaw + 90;
+	float Remainder = 0;
+	UKismetMathLibrary::FMod(NeededRotatorYaw - PastRotationZ, 360.0f, Remainder);
+	float NewYaw = PastRotationZ + Remainder * DeltaTime * RotationSpeed;
+	if (CylinderMesh)
+	CylinderMesh->SetWorldRotation(FRotator(CylinderMesh->GetComponentRotation().Pitch, NewYaw, CylinderMesh->GetComponentRotation().Roll));
+	PastRotationZ = NewYaw;
+}

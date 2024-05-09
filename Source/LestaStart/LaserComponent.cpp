@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "LaserComponent.h"
+#include"./Core/LestaPlayerController.h"
 
 // Sets default values for this component's properties
 ULaserComponent::ULaserComponent()
@@ -20,7 +20,7 @@ void ULaserComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+	CollisionParams.AddIgnoredActor(this->GetOwner());
 }
 
 
@@ -28,24 +28,33 @@ void ULaserComponent::BeginPlay()
 void ULaserComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 	// ...
 }
 
-void ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel)
+void ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel) const
 {
-	double DeltaTime = GetWorld()->GetDeltaSeconds();
-	FHitResult Hit;
-	DrawDebugLine(GetWorld(), DrawStart, TraceEnd, FColor::Magenta);
-	bool bBlockHit = GetWorld()->LineTraceSingleByChannel(Hit, DrawStart, TraceEnd, Channel);
-	if (bBlockHit)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, Hit.GetActor()->GetName());
-		auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
-		if (HitHealth)
+		double DeltaTime = GetWorld()->GetDeltaSeconds();
+		FHitResult Hit;
+		DrawDebugLine(GetWorld(), DrawStart, TraceEnd, FColor::Magenta);
+		bool bBlockHit = GetWorld()->LineTraceSingleByChannel(Hit, DrawStart, TraceEnd, Channel, CollisionParams);
+		if (bBlockHit)
 		{
-			HitHealth->FTakeDamage(DeltaTime * DamagePerSecond);
+			//GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, GetOwner()->GetName() + (GetOwnerRole() == ENetRole::ROLE_Authority ? "  Authority" : "  Not auth"));
+			auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
+			if (HitHealth)
+			{
+				//auto PlayerController = Cast<ALestaPlayerController>(GetWorld()->GetFirstPlayerController());
+				//if (PlayerController)
+				//{
+				//	PlayerController->DealDamageToActor(HitHealth, DeltaTime * DamagePerSecond);
+				//}
+				HitHealth->FTakeDamage(DeltaTime * DamagePerSecond);
+			}
 		}
-	}
 }
 
+float ULaserComponent::GetMaxHitDistance() const
+{
+	return MaxHitDistance;
+}

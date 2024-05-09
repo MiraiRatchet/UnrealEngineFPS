@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "HealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "Components/WidgetComponent.h"
+#include "Engine/GameEngine.h"
+#include "HealthHUD.h"
 #include "CubeActor.generated.h"
 
 UCLASS()
@@ -16,11 +19,12 @@ public:
 	// Sets default values for this actor's properties
 	ACubeActor();
 
-	UPROPERTY(EditDefaultsOnly)
-	UHealthComponent* CubeHealth;
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
+	UWidgetComponent* WidgetComponent;
 
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* CubeMesh;
+
+	UFUNCTION()
+	void HealthBarChange();
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,4 +34,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+private:
+
+	UPROPERTY(Replicated)
+	UHealthComponent* CubeHealth;
+
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* CubeMesh;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	UHealthHUD* HealthHUD;
 };

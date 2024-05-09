@@ -7,7 +7,10 @@
 #include "Engine/GameEngine.h"
 #include "HealthComponent.h"
 #include "LaserComponent.h"
+#include "HealthHUD.h"
+#include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "TurretLaserActor.generated.h"
 
 UCLASS()
@@ -27,23 +30,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditDefaultsOnly)
-	USceneComponent* TraceStartPosition;
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	UWidgetComponent* HealthWidget;
 
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* TurretMesh;
-
-	UPROPERTY(EditAnywhere)
-	USphereComponent* SphereCollision;
-
-	UPROPERTY(EditDefaultsOnly)
-	UHealthComponent* TurretHealth;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	ULaserComponent* LaserWeapon;
-
-	UPROPERTY(VisibleAnywhere)
-	AActor* OverlappingActor = nullptr;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
 	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -53,6 +43,45 @@ public:
 	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp,
 		AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+private:
 	FVector TraceStart;
+
+	UFUNCTION()
+	void HealthBarChange();
+
+	FVector CylinderWorldLocation;
+
+	float PastRotationZ;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0", ClampMax = "1"))
+	float RotationSpeed = 0.7;
+
+	UFUNCTION()
+	void RotateToPlayer(float DeltaTime);
+	float NeededRotatorYaw = 0;
+
+	UPROPERTY(Replicated, VisibleInstanceOnly)
+	AActor* OverlappingActor = nullptr;
+
+	UPROPERTY(Replicated, EditDefaultsOnly)
+	UHealthComponent* TurretHealth;
+
+	UPROPERTY(Replicated, VisibleDefaultsOnly)
+	UHealthHUD* HealthHUD;
+
+	UPROPERTY(EditDefaultsOnly)
+	USceneComponent* TraceStartPosition;
+
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* TurretMesh;
+
+	UPROPERTY(Replicated, EditDefaultsOnly)
+	UStaticMeshComponent* CylinderMesh;
+
+	UPROPERTY(EditAnywhere)
+	USphereComponent* SphereCollision;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	ULaserComponent* LaserWeapon;
 
 };
