@@ -42,6 +42,7 @@ void ATurretLaserActor::BeginPlay()
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereBeginOverlap);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereEndOverlap);
 
+	if (TurretHealth)
 	TurretHealth->OnHealthChangeEvent.BindDynamic(this, &ATurretLaserActor::HealthBarChange);
 	HealthHUD = Cast<UHealthHUD>(HealthWidget->GetUserWidgetObject());
 	HealthBarChange();
@@ -97,7 +98,7 @@ void ATurretLaserActor::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp,
 
 void ATurretLaserActor::HealthBarChange()
 {
-	if (HealthHUD)
+	if (HealthHUD && TurretHealth)
 	{
 		HealthHUD->HealthUIChange(TurretHealth->GetCurrentHealth(), TurretHealth->GetMaximumHealth(), TurretHealth->GetPercentHealth());
 	}

@@ -19,7 +19,7 @@ public:
 	// Sets default values for this actor's properties
 	ACubeActor();
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UWidgetComponent* WidgetComponent;
 
 
@@ -44,6 +44,6 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* CubeMesh;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	UHealthHUD* HealthHUD;
 };

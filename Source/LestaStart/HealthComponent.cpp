@@ -2,6 +2,7 @@
 
 
 #include "HealthComponent.h"
+#include "./Core/LestaPlayerController.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -34,13 +35,11 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UHealthComponent::FTakeDamage(float HealthPoints)
 {
-	CurrentHealth = FMath::Clamp(CurrentHealth - HealthPoints, 0, MaximumHealth);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, FString::Printf(TEXT("%s health now %f"), *(GetOwner()->GetName()), CurrentHealth));
-	OnHealthChangeEvent.ExecuteIfBound();
-	if (CurrentHealth == 0)
-	{
-		FKill();
-	}
+	
+	auto ThisComp = this;
+	auto PlayerController = Cast<ALestaPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (PlayerController)
+		PlayerController->ServerDealDamageToActor(ThisComp, HealthPoints);
 }
 
 void UHealthComponent::FHeal(float HealthPoints)
@@ -72,6 +71,16 @@ float UHealthComponent::GetCurrentHealth() const
 float UHealthComponent::GetPercentHealth() const
 {
 	return CurrentHealth / MaximumHealth;
+}
+
+void UHealthComponent::SetCurrentHealth(float Health)
+{
+	CurrentHealth = Health;
+}
+
+void UHealthComponent::OnRep_UpdateHUD() const
+{
+	OnHealthChangeEvent.ExecuteIfBound();
 }
 
 void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

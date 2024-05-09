@@ -44,11 +44,6 @@ void ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector
 			auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
 			if (HitHealth)
 			{
-				//auto PlayerController = Cast<ALestaPlayerController>(GetWorld()->GetFirstPlayerController());
-				//if (PlayerController)
-				//{
-				//	PlayerController->DealDamageToActor(HitHealth, DeltaTime * DamagePerSecond);
-				//}
 				HitHealth->FTakeDamage(DeltaTime * DamagePerSecond);
 			}
 		}
