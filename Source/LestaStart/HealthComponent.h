@@ -52,6 +52,8 @@ public:
 	UFUNCTION()
 	void OnRep_UpdateHUD() const;
 
+	bool IsDead() const;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:

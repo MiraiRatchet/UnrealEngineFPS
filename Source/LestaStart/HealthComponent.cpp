@@ -35,7 +35,6 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UHealthComponent::FTakeDamage(float HealthPoints)
 {
-	
 	auto ThisComp = this;
 	auto PlayerController = Cast<ALestaPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (PlayerController)
@@ -81,6 +80,15 @@ void UHealthComponent::SetCurrentHealth(float Health)
 void UHealthComponent::OnRep_UpdateHUD() const
 {
 	OnHealthChangeEvent.ExecuteIfBound();
+}
+
+bool UHealthComponent::IsDead() const
+{
+	if (CurrentHealth == 0)
+	{
+		return true;
+	}
+	return false;
 }
 
 void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

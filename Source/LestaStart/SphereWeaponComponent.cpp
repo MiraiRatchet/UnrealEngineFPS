@@ -46,11 +46,6 @@ void USphereWeaponComponent::ChargedShot(FVector DrawingLocation)
 			auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
 			if (HitHealth)
 			{
-				//auto PlayerController = Cast<ALestaPlayerController>(GetWorld()->GetFirstPlayerController());
-				//if (PlayerController)
-				//{
-				//	PlayerController->DealDamageToActor(HitHealth, CurrentChargedDamage);
-				//}
 				HitHealth->FTakeDamage(CurrentChargedDamage);
 			}
 		}

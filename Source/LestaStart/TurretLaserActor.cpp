@@ -24,7 +24,7 @@ ATurretLaserActor::ATurretLaserActor()
 	SphereCollision->SetupAttachment(GetRootComponent());
 
 	TraceStartPosition = CreateDefaultSubobject<USceneComponent>(TEXT("TraceStartPosition"));
-	TraceStartPosition->SetupAttachment(GetRootComponent());
+	TraceStartPosition->SetupAttachment(CylinderMesh);
 
 	TurretHealth = CreateDefaultSubobject<UHealthComponent>(TEXT("TurretHealth"));
 	LaserWeapon = CreateDefaultSubobject<ULaserComponent>(TEXT("LaserWeapon"));
@@ -36,8 +36,6 @@ ATurretLaserActor::ATurretLaserActor()
 void ATurretLaserActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	TraceStart = TraceStartPosition->GetComponentLocation();
 
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereBeginOverlap);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereEndOverlap);
@@ -57,8 +55,9 @@ void ATurretLaserActor::Tick(float DeltaTime)
 	if (OverlappingActor)
 	{
 		RotateToPlayer(DeltaTime);
-		if (LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
+		if (HasAuthority() && LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
 		{
+			TraceStart = TraceStartPosition->GetComponentLocation();
 			LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
 		}
 	}
@@ -71,8 +70,6 @@ void ATurretLaserActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME(ATurretLaserActor, TurretHealth);
 	DOREPLIFETIME(ATurretLaserActor, CylinderMesh);
-	DOREPLIFETIME(ATurretLaserActor, HealthWidget);
-	DOREPLIFETIME(ATurretLaserActor, HealthHUD);
 	DOREPLIFETIME(ATurretLaserActor, OverlappingActor);
 
 }
@@ -106,8 +103,12 @@ void ATurretLaserActor::HealthBarChange()
 
 void ATurretLaserActor::RotateToPlayer(float DeltaTime)
 {
-	NeededRotatorYaw = UKismetMathLibrary::FindLookAtRotation(CylinderWorldLocation, OverlappingActor->GetActorLocation()).Yaw + 90;
+	NeededRotatorYaw = UKismetMathLibrary::FindLookAtRotation(CylinderWorldLocation, OverlappingActor->GetActorLocation()).Yaw + 90 + 180;
 	float Remainder = 0;
+	if (NeededRotatorYaw >= 180)
+	{
+		NeededRotatorYaw -= 360;
+	}
 	UKismetMathLibrary::FMod(NeededRotatorYaw - PastRotationZ, 360.0f, Remainder);
 	float NewYaw = PastRotationZ + Remainder * DeltaTime * RotationSpeed;
 	if (CylinderMesh)

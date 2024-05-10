@@ -30,7 +30,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	UWidgetComponent* HealthWidget;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -66,11 +66,8 @@ private:
 	UPROPERTY(Replicated, EditDefaultsOnly)
 	UHealthComponent* TurretHealth;
 
-	UPROPERTY(Replicated, VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly)
 	UHealthHUD* HealthHUD;
-
-	UPROPERTY(EditDefaultsOnly)
-	USceneComponent* TraceStartPosition;
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* TurretMesh;
@@ -84,4 +81,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	ULaserComponent* LaserWeapon;
 
+	UPROPERTY(EditDefaultsOnly)
+	USceneComponent* TraceStartPosition;
 };

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LestaCharacter.h"
 #include "GameFramework/GameModeBase.h"
 #include "LestaGameMode.generated.h"
 
@@ -11,6 +12,11 @@ UCLASS()
 class LESTASTART_API ALestaGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	TArray<ALestaCharacter*> PlayerCharacters;
+	int AlivePlayerCount = 0;
 
 	// You can extend this class if required
 	// Blueprint GameMode class is derived from the ALestaGameMode
