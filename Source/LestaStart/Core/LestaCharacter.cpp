@@ -2,7 +2,6 @@
 
 #include "LestaCharacter.h"
 #include "EnhancedInputComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 
 ALestaCharacter::ALestaCharacter()
@@ -130,5 +129,15 @@ void ALestaCharacter::OnWeaponChangeInput(const FInputActionInstance& InputActio
 
 void ALestaCharacter::PlayerDead()
 {
-	UGameplayStatics::OpenLevel(this, FName(UGameplayStatics::GetCurrentLevelName(this)));
+	auto PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		//PlayerController->UnPossess();
+		if (OnClientUnpossess.IsBound())
+		{
+			UE_LOG(LogTemp, Display, TEXT("ISBOUND"));
+			OnClientUnpossess.Execute(PlayerController);
+		}
+	}
+	//UGameplayStatics::OpenLevel(this, FName(UGameplayStatics::GetCurrentLevelName(this)));
 }

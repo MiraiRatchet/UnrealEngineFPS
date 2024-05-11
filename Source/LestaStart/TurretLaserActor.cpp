@@ -55,10 +55,15 @@ void ATurretLaserActor::Tick(float DeltaTime)
 	if (OverlappingActor)
 	{
 		RotateToPlayer(DeltaTime);
-		if (HasAuthority() && LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
+		if (LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
 		{
 			TraceStart = TraceStartPosition->GetComponentLocation();
-			LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+			if (HasAuthority())
+			{
+				LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+			}
+			if (GetNetMode() != NM_DedicatedServer)
+			LaserProjectileSpawn(TraceStart, LaserWeapon->GetTraceEnd());
 		}
 	}
 
@@ -71,7 +76,7 @@ void ATurretLaserActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(ATurretLaserActor, TurretHealth);
 	DOREPLIFETIME(ATurretLaserActor, CylinderMesh);
 	DOREPLIFETIME(ATurretLaserActor, OverlappingActor);
-
+	DOREPLIFETIME(ATurretLaserActor, LaserWeapon);
 }
 
 void ATurretLaserActor::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp,

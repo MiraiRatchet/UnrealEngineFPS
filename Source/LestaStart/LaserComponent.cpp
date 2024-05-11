@@ -6,6 +6,7 @@
 // Sets default values for this component's properties
 ULaserComponent::ULaserComponent()
 {
+	SetIsReplicated(true);
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
@@ -32,16 +33,18 @@ void ULaserComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	// ...
 }
 
-void ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel) const
+void ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel)
 {
 		double DeltaTime = GetWorld()->GetDeltaSeconds();
 		FHitResult Hit;
 		DrawDebugLine(GetWorld(), DrawStart, TraceEnd, FColor::Magenta);
+		TraceEndLoc = TraceEnd;
 		bool bBlockHit = GetWorld()->LineTraceSingleByChannel(Hit, DrawStart, TraceEnd, Channel, CollisionParams);
 		if (bBlockHit)
 		{
 			//GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, GetOwner()->GetName() + (GetOwnerRole() == ENetRole::ROLE_Authority ? "  Authority" : "  Not auth"));
 			auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
+			TraceEndLoc = Hit.GetActor()->GetActorLocation();
 			if (HitHealth)
 			{
 				HitHealth->FTakeDamage(DeltaTime * DamagePerSecond);
@@ -52,4 +55,9 @@ void ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector
 float ULaserComponent::GetMaxHitDistance() const
 {
 	return MaxHitDistance;
+}
+
+FVector ULaserComponent::GetTraceEnd() const
+{
+	return TraceEndLoc;
 }

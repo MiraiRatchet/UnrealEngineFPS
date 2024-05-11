@@ -24,7 +24,7 @@ void ALestaPlayerController::ServerDealDamageToActor_Implementation(UHealthCompo
 		HP->SetCurrentHealth(FMath::Clamp(HP->GetCurrentHealth() - Damage, 0, HP->GetMaximumHealth()));
 		HP->OnHealthChangeEvent.ExecuteIfBound();
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, FString::Printf(TEXT("%s health now %f"), *(HP->GetName()), HP->GetCurrentHealth()));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, FString::Printf(TEXT("%s health now %f"), *(HP->GetName()), HP->GetCurrentHealth()));
 	if (HasAuthority())
 	{
 		if (HP->GetCurrentHealth() == 0)

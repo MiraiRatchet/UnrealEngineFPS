@@ -8,10 +8,11 @@
 #include "../HealthComponent.h"
 #include "../LaserComponent.h"
 #include "../SphereWeaponComponent.h"
-//#include "Components/Widget.h"
 #include "LestaCharacter.generated.h"
 
 class UCameraComponent;
+
+DECLARE_DELEGATE_OneParam(FOnClientUnpossess, APlayerController*);
 
 UENUM(BlueprintType)
 enum class UWeaponState : uint8
@@ -32,6 +33,8 @@ class LESTASTART_API ALestaCharacter : public ACharacter
 public:
 	ALestaCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	FOnClientUnpossess OnClientUnpossess;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* PistolMuzzle = nullptr;

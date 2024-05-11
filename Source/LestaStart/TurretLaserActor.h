@@ -22,6 +22,9 @@ public:
 	// Sets default values for this actor's properties
 	ATurretLaserActor();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void LaserProjectileSpawn(FVector Begin, FVector End);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -78,7 +81,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	USphereComponent* SphereCollision;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Weapon")
 	ULaserComponent* LaserWeapon;
 
 	UPROPERTY(EditDefaultsOnly)

@@ -10,6 +10,7 @@
 #include "LaserComponent.generated.h"
 
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LESTASTART_API ULaserComponent : public UActorComponent
 {
@@ -20,10 +21,13 @@ public:
 	ULaserComponent();
 
 	UFUNCTION()
-	void ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel) const;
+	void ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel);
 
 	UFUNCTION()
 	float GetMaxHitDistance() const;
+
+	UFUNCTION()
+	FVector GetTraceEnd() const;
 
 protected:
 	// Called when the game starts
@@ -44,4 +48,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MaxHitDistance = 300;
+
+	UPROPERTY(VisibleInstanceOnly)
+	FVector TraceEndLoc;
 };

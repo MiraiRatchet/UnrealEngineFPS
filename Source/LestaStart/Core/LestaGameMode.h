@@ -15,9 +15,13 @@ class LESTASTART_API ALestaGameMode : public AGameModeBase
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
+	//void ClientDead(APawn* CharPawn);
+
 	TArray<ALestaCharacter*> PlayerCharacters;
 	int AlivePlayerCount = 0;
 
 	// You can extend this class if required
 	// Blueprint GameMode class is derived from the ALestaGameMode
+
+
 };
