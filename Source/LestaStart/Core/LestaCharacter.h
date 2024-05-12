@@ -42,6 +42,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UHealthComponent* PlayerHealth;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ExplosionSpawn();
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> CameraComponent;
