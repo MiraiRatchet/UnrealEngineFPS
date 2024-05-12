@@ -63,10 +63,7 @@ void ATurretLaserActor::Tick(float DeltaTime)
 		if (LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
 		{
 			TraceStart = TraceStartPosition->GetComponentLocation();
-			if (HasAuthority())
-			{
-				TraceEnd = LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
-			}
+			TraceEnd = LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
 			NiagaraComponent->SetNiagaraVariableVec3("BeamEnd", TraceEnd);
 		}
 	}
