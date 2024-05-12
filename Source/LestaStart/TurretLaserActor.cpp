@@ -28,8 +28,6 @@ ATurretLaserActor::ATurretLaserActor()
 
 	TurretHealth = CreateDefaultSubobject<UHealthComponent>(TEXT("TurretHealth"));
 	LaserWeapon = CreateDefaultSubobject<ULaserComponent>(TEXT("LaserWeapon"));
-
-	CylinderMesh->SetRelativeLocation(FVector(0, 0, 75));
 }
 
 // Called when the game starts or when spawned
