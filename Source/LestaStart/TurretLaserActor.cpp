@@ -24,12 +24,10 @@ ATurretLaserActor::ATurretLaserActor()
 	SphereCollision->SetupAttachment(GetRootComponent());
 
 	TraceStartPosition = CreateDefaultSubobject<USceneComponent>(TEXT("TraceStartPosition"));
-	TraceStartPosition->SetupAttachment(GetRootComponent());
+	TraceStartPosition->SetupAttachment(CylinderMesh);
 
 	TurretHealth = CreateDefaultSubobject<UHealthComponent>(TEXT("TurretHealth"));
 	LaserWeapon = CreateDefaultSubobject<ULaserComponent>(TEXT("LaserWeapon"));
-
-	CylinderMesh->SetRelativeLocation(FVector(0, 0, 75));
 }
 
 // Called when the game starts or when spawned
@@ -37,11 +35,10 @@ void ATurretLaserActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TraceStart = TraceStartPosition->GetComponentLocation();
-
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereBeginOverlap);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &ATurretLaserActor::OnSphereEndOverlap);
 
+	if (TurretHealth)
 	TurretHealth->OnHealthChangeEvent.BindDynamic(this, &ATurretLaserActor::HealthBarChange);
 	HealthHUD = Cast<UHealthHUD>(HealthWidget->GetUserWidgetObject());
 	HealthBarChange();
@@ -58,7 +55,13 @@ void ATurretLaserActor::Tick(float DeltaTime)
 		RotateToPlayer(DeltaTime);
 		if (LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
 		{
-			LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+			TraceStart = TraceStartPosition->GetComponentLocation();
+			if (HasAuthority())
+			{
+				LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+			}
+			if (GetNetMode() != NM_DedicatedServer)
+			LaserProjectileSpawn(TraceStart, LaserWeapon->GetTraceEnd());
 		}
 	}
 
@@ -70,10 +73,8 @@ void ATurretLaserActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME(ATurretLaserActor, TurretHealth);
 	DOREPLIFETIME(ATurretLaserActor, CylinderMesh);
-	DOREPLIFETIME(ATurretLaserActor, HealthWidget);
-	DOREPLIFETIME(ATurretLaserActor, HealthHUD);
 	DOREPLIFETIME(ATurretLaserActor, OverlappingActor);
-
+	DOREPLIFETIME(ATurretLaserActor, LaserWeapon);
 }
 
 void ATurretLaserActor::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp,
@@ -97,7 +98,7 @@ void ATurretLaserActor::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComp,
 
 void ATurretLaserActor::HealthBarChange()
 {
-	if (HealthHUD)
+	if (HealthHUD && TurretHealth)
 	{
 		HealthHUD->HealthUIChange(TurretHealth->GetCurrentHealth(), TurretHealth->GetMaximumHealth(), TurretHealth->GetPercentHealth());
 	}
@@ -105,8 +106,12 @@ void ATurretLaserActor::HealthBarChange()
 
 void ATurretLaserActor::RotateToPlayer(float DeltaTime)
 {
-	NeededRotatorYaw = UKismetMathLibrary::FindLookAtRotation(CylinderWorldLocation, OverlappingActor->GetActorLocation()).Yaw + 90;
+	NeededRotatorYaw = UKismetMathLibrary::FindLookAtRotation(CylinderWorldLocation, OverlappingActor->GetActorLocation()).Yaw + 90 + 180;
 	float Remainder = 0;
+	if (NeededRotatorYaw >= 180)
+	{
+		NeededRotatorYaw -= 360;
+	}
 	UKismetMathLibrary::FMod(NeededRotatorYaw - PastRotationZ, 360.0f, Remainder);
 	float NewYaw = PastRotationZ + Remainder * DeltaTime * RotationSpeed;
 	if (CylinderMesh)

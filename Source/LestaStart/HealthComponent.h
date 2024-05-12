@@ -46,6 +46,14 @@ public:
 	UFUNCTION()
 	float GetPercentHealth() const;
 
+	UFUNCTION()
+	void SetCurrentHealth(float Health);
+
+	UFUNCTION()
+	void OnRep_UpdateHUD() const;
+
+	bool IsDead() const;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
@@ -59,6 +67,6 @@ private:
 	UPROPERTY(Replicated, EditAnywhere, Category = "Health")
 	int MaximumHealth;
 
-	UPROPERTY(Replicated, VisibleAnywhere, Category = "Health")
+	UPROPERTY(ReplicatedUsing = OnRep_UpdateHUD, VisibleAnywhere, Category = "Health")
 	float CurrentHealth;
 };

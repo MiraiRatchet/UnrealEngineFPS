@@ -16,6 +16,7 @@ public class LestaStart : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"UMG",
+			"Niagara",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

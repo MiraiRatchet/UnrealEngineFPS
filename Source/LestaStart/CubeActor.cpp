@@ -38,8 +38,6 @@ void ACubeActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACubeActor, CubeHealth);
-	DOREPLIFETIME(ACubeActor, HealthHUD);
-	DOREPLIFETIME(ACubeActor, WidgetComponent);
 }
 
 void ACubeActor::HealthBarChange()

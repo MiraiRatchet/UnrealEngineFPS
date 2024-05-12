@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "../HealthComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "LestaPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -28,7 +29,8 @@ protected:
 	int32 InputMappingPriority = 0;
 
 	virtual void BeginPlay() override;
-//public:
-//	UFUNCTION()
-//	void DealDamageToActor(UHealthComponent* HealthComp, float Damage);
+public:
+
+	UFUNCTION(Server, Reliable)
+	void ServerDealDamageToActor(UHealthComponent* HP, float Damage);
 };

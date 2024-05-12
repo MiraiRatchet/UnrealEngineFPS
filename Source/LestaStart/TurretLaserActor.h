@@ -22,6 +22,9 @@ public:
 	// Sets default values for this actor's properties
 	ATurretLaserActor();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void LaserProjectileSpawn(FVector Begin, FVector End);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -30,7 +33,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	UWidgetComponent* HealthWidget;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -66,11 +69,8 @@ private:
 	UPROPERTY(Replicated, EditDefaultsOnly)
 	UHealthComponent* TurretHealth;
 
-	UPROPERTY(Replicated, VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly)
 	UHealthHUD* HealthHUD;
-
-	UPROPERTY(EditDefaultsOnly)
-	USceneComponent* TraceStartPosition;
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* TurretMesh;
@@ -81,7 +81,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	USphereComponent* SphereCollision;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Weapon")
 	ULaserComponent* LaserWeapon;
 
+	UPROPERTY(EditDefaultsOnly)
+	USceneComponent* TraceStartPosition;
 };
