@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Kismet/GameplayStatics.h"
 #include "LestaGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 void ALestaGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -24,14 +24,3 @@ void ALestaGameMode::PostLogin(APlayerController* NewPlayer)
 		GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Yellow, TEXT("NEW FRIEND"));
 	}
 }
-
-//void ALestaGameMode::ClientDead(APawn* CharPawn)
-//{
-//	AlivePlayerCount--;
-//	UE_LOG(LogTemp, Display, TEXT("EXECUTED"));
-//	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Yellow, TEXT("MINUS FRIEND"));
-//	if (AlivePlayerCount <= 0)
-//	{
-//		UGameplayStatics::OpenLevel(this, FName(UGameplayStatics::GetCurrentLevelName(this)));
-//	}
-//}

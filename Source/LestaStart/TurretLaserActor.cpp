@@ -28,6 +28,10 @@ ATurretLaserActor::ATurretLaserActor()
 
 	TurretHealth = CreateDefaultSubobject<UHealthComponent>(TEXT("TurretHealth"));
 	LaserWeapon = CreateDefaultSubobject<ULaserComponent>(TEXT("LaserWeapon"));
+
+	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraLaser"));
+
+	NiagaraComponent->SetupAttachment(TraceStartPosition);
 }
 
 // Called when the game starts or when spawned
@@ -45,6 +49,8 @@ void ATurretLaserActor::BeginPlay()
 
 	CylinderWorldLocation = CylinderMesh->GetComponentLocation();
 	PastRotationZ = CylinderMesh->GetComponentRotation().Yaw;
+
+	NiagaraComponent->SetNiagaraVariableVec3("BeamEnd", TraceStartPosition->GetComponentLocation());
 }
 // Called every frame
 void ATurretLaserActor::Tick(float DeltaTime)
@@ -53,16 +59,20 @@ void ATurretLaserActor::Tick(float DeltaTime)
 	if (OverlappingActor)
 	{
 		RotateToPlayer(DeltaTime);
+		NiagaraComponent->SetNiagaraVariableVec3("BeamEnd", TraceStartPosition->GetComponentLocation());
 		if (LaserWeapon && FMath::IsNearlyEqual(CylinderMesh->GetComponentRotation().Yaw, NeededRotatorYaw, 5.0))
 		{
 			TraceStart = TraceStartPosition->GetComponentLocation();
 			if (HasAuthority())
 			{
-				LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
+				TraceEnd = LaserWeapon->ChargedShot(TraceStart, TraceStart, OverlappingActor->GetActorLocation(), ECC_Pawn);
 			}
-			if (GetNetMode() != NM_DedicatedServer)
-			LaserProjectileSpawn(TraceStart, LaserWeapon->GetTraceEnd());
+			NiagaraComponent->SetNiagaraVariableVec3("BeamEnd", TraceEnd);
 		}
+	}
+	else
+	{
+		TraceEnd = TraceStartPosition->GetComponentLocation();
 	}
 
 }
