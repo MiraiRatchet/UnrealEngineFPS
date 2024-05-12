@@ -73,6 +73,7 @@ void ALestaCharacter::OnShootTriggeredInput(const FInputActionInstance& InputAct
 	switch (WeaponState) {
 	case (UWeaponState::SPHERE):
 		SphereWeapon->ChargedShot(GetActorLocation());
+		ExplosionSpawn();
 		break;
 	}
 	IsCharging = false;

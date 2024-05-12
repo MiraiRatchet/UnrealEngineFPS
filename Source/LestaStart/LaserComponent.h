@@ -21,13 +21,10 @@ public:
 	ULaserComponent();
 
 	UFUNCTION()
-	void ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel);
+	FVector ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel);
 
 	UFUNCTION()
 	float GetMaxHitDistance() const;
-
-	UFUNCTION()
-	FVector GetTraceEnd() const;
 
 protected:
 	// Called when the game starts
@@ -48,7 +45,4 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MaxHitDistance = 300;
-
-	UPROPERTY(VisibleInstanceOnly)
-	FVector TraceEndLoc;
 };

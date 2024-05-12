@@ -10,6 +10,8 @@
 #include "HealthHUD.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "TurretLaserActor.generated.h"
 
@@ -21,9 +23,6 @@ class LESTASTART_API ATurretLaserActor : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ATurretLaserActor();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void LaserProjectileSpawn(FVector Begin, FVector End);
 
 protected:
 	// Called when the game starts or when spawned
@@ -86,4 +85,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	USceneComponent* TraceStartPosition;
+
+	UPROPERTY(Replicated, VisibleInstanceOnly)
+	FVector TraceEnd;
+
+	UPROPERTY(EditDefaultsOnly)
+	UNiagaraComponent* NiagaraComponent;
 };

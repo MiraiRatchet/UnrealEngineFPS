@@ -33,23 +33,23 @@ void ULaserComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	// ...
 }
 
-void ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel)
+FVector ULaserComponent::ChargedShot(FVector DrawStart, FVector TraceStart, FVector TraceEnd, ECollisionChannel Channel)
 {
-		double DeltaTime = GetWorld()->GetDeltaSeconds();
-		FHitResult Hit;
-		DrawDebugLine(GetWorld(), DrawStart, TraceEnd, FColor::Magenta);
-		TraceEndLoc = TraceEnd;
-		bool bBlockHit = GetWorld()->LineTraceSingleByChannel(Hit, DrawStart, TraceEnd, Channel, CollisionParams);
-		if (bBlockHit)
+	double DeltaTime = GetWorld()->GetDeltaSeconds();
+	FHitResult Hit;
+	DrawDebugLine(GetWorld(), DrawStart, TraceEnd, FColor::Magenta);
+	bool bBlockHit = GetWorld()->LineTraceSingleByChannel(Hit, DrawStart, TraceEnd, Channel, CollisionParams);
+	if (bBlockHit)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, GetOwner()->GetName() + (GetOwnerRole() == ENetRole::ROLE_Authority ? "  Authority" : "  Not auth"));
+		auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
+		if (HitHealth)
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, GetOwner()->GetName() + (GetOwnerRole() == ENetRole::ROLE_Authority ? "  Authority" : "  Not auth"));
-			auto HitHealth = Hit.GetActor()->FindComponentByClass<UHealthComponent>();
-			TraceEndLoc = Hit.GetActor()->GetActorLocation();
-			if (HitHealth)
-			{
-				HitHealth->FTakeDamage(DeltaTime * DamagePerSecond);
-			}
+			HitHealth->FTakeDamage(DeltaTime * DamagePerSecond);
 		}
+		return (-TraceStart + TraceEnd).GetSafeNormal() * Hit.Distance + TraceStart;
+	}
+	return TraceEnd;
 }
 
 float ULaserComponent::GetMaxHitDistance() const
@@ -57,7 +57,3 @@ float ULaserComponent::GetMaxHitDistance() const
 	return MaxHitDistance;
 }
 
-FVector ULaserComponent::GetTraceEnd() const
-{
-	return TraceEndLoc;
-}
